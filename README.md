@@ -4,6 +4,7 @@
 
 NOTE THAT THIS PROJECT IS NOT YET FINISHED.  IT IS NOT EVEN BETA YET.  ITEMS
 LEFT TO DO INCLUDE:
+
  - Finish scp publishing (or rsync syncing?).  Files get published to the
    local directory, but not to remote servers, regardless of the script
    configuration.
