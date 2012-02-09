@@ -124,7 +124,7 @@ class NotationalPub
             f = File.new(html, "w")
             f.print("<!DOCTYPE html>\n<html><head><title>#{File.basename(html)}</title></head><body>\n");
             f.close
-            command = "#{$markdown_app} '#{escaped1}' >> '#{escaped2}'"
+            command = "#{$markdown_app} '#{escaped1}' | sed 's/<public>//g' >> '#{escaped2}'"
             #print "#{command}\n"
             if !system(command)
                 print "Error running command: #{command}\n"
