@@ -47,6 +47,9 @@ class NotationalPub
     def initialize
         @note_list = Array.new
         @html_list = Array.new
+
+        @private_note_list = Array.new
+        @unknown_note_list = Array.new
     end
 
     # Sanity-check the environment based on the settings we were given
@@ -76,16 +79,17 @@ class NotationalPub
 
     # Given a filename (fully-qualified path), check that it's a regular file
     # with a file extension and a "<public>" tag somewhere in there.
-    def is_public?(filename)
+    def get_visibility(filename)
         # Filename must have a dot in it.  Fail otherwise.
         return false if filename.index('.') == nil
         # grep for "<public>"
         File.open(filename, "r").each_line { |line|
-            return true if line.index('<public>') != nil
+            return :public if line.index('<public>') != nil
+            return :private if line.index('<private>') != nil
         }
-        return false
+        return :unknown
     end
-    private :is_public?
+    private :get_visibility
 
     # Locate note files with the "<public>" tag and store them in our
     # @note_list ivar.
@@ -95,7 +99,10 @@ class NotationalPub
             Dir.foreach($notes_folder) { |filename|
                 full_filename = "#{$notes_folder}/#{filename}"
                 next unless File.file?(full_filename)
-                next unless is_public?(full_filename)
+                visibility = get_visibility(full_filename);
+                @private_note_list << filename if :private == visibility
+                @unknown_note_list << filename if :unknown == visibility
+                next unless :public == visibility
                 @note_list << full_filename
                 print "  #{filename}\n" if $verbose
             }
@@ -142,6 +149,14 @@ class NotationalPub
         }
     end
 
+    def print_unknown_notes
+        return true if @unknown_note_list.empty?
+        print "Notes with unknown visibility (assuming private):\n"
+        @unknown_note_list.sort!
+        @unknown_note_list.each { |item| print "  #{item}\n" }
+        return true
+    end
+
     def publish_notes
         return true if $ssh_publish_path.empty?
     end
@@ -151,6 +166,7 @@ end # class NotationalPub
 np = NotationalPub.new
 exit 1 unless np.validate_environment
 exit 1 unless np.find_notes
+exit 1 unless np.print_unknown_notes
 exit 1 unless np.process_notes
 print "Finished successfully!\n" if $verbose
 
