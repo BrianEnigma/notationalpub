@@ -43,6 +43,8 @@ $markdown_app       = "multimarkdown"
 
 ##### No user-serviceable parts below this line #####
 
+$dry_run            = false
+
 class NotationalPub
     def initialize
         @note_list = Array.new
@@ -163,10 +165,20 @@ class NotationalPub
 
 end # class NotationalPub
 
+ARGV.each { |arg|
+    $dry_run = true if arg == "-d" #dry run
+    $dry_run = true if arg == "-t" #test run
+}
+
+$verbose = false if $dry_run
 np = NotationalPub.new
 exit 1 unless np.validate_environment
 exit 1 unless np.find_notes
+$verbose = true if $dry_run
 exit 1 unless np.print_unknown_notes
-exit 1 unless np.process_notes
-print "Finished successfully!\n" if $verbose
+if (true != $dry_run)
+    exit 1 unless np.process_notes
+    print "Finished successfully!\n" if $verbose
+end
+
 
