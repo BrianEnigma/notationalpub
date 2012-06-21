@@ -54,6 +54,12 @@ class NotationalPub
         @unknown_note_list = Array.new
     end
 
+    def print_stats
+        print "Found #{@note_list.count} public note#{@note_list.count == 1 ? '' : 's'}, "
+        print "#{@private_note_list.count} private note#{@private_note_list.count == 1 ? '' : 's'}, "
+        print "#{@unknown_note_list.count} unknown note#{@unknown_note_list.count == 1 ? '' : 's'}\n"
+    end
+
     # Sanity-check the environment based on the settings we were given
     def validate_environment
         if !File.directory?($notes_folder)
@@ -175,6 +181,7 @@ np = NotationalPub.new
 exit 1 unless np.validate_environment
 exit 1 unless np.find_notes
 $verbose = true if $dry_run
+np.print_stats if true == $verbose
 exit 1 unless np.print_unknown_notes
 if (true != $dry_run)
     exit 1 unless np.process_notes
