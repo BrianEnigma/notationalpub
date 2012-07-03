@@ -44,6 +44,7 @@ $markdown_app       = "multimarkdown"
 ##### No user-serviceable parts below this line #####
 
 $dry_run            = false
+$help               = false
 
 class NotationalPub
     def initialize
@@ -171,10 +172,29 @@ class NotationalPub
 
 end # class NotationalPub
 
+# Keeping this simple and braindead to avoid pulling in gems and the getopt gem
 ARGV.each { |arg|
     $dry_run = true if arg == "-d" #dry run
     $dry_run = true if arg == "-t" #test run
+    $help = true if arg == '-h'
+    $help = true if arg == '--help'
+    $help = true if arg == '-v'
+    $help = true if arg == '-V'
+    $help = true if arg == '--version'
+    $verbose = false if arg = '-q'
 }
+
+if true == $help
+    print "./notationalpub.rb [-d][-t][-q]\n"
+    print "\n"
+    print "-d and -t do the same thing and stand for \"dry run\" and \"test\" respectively.\n"
+    print "They scan your notes database and give you stats about public/private/untagged\n"
+    print "without actually creating HTML or syncing.\n"
+    print "\n"
+    print "-q quiets the output. This is good to prevent spammy updates if running\n"
+    print "frequently from a cron job.\n"
+    exit 1
+end
 
 $verbose = false if $dry_run
 np = NotationalPub.new
@@ -185,6 +205,7 @@ np.print_stats if true == $verbose
 exit 1 unless np.print_unknown_notes
 if (true != $dry_run)
     exit 1 unless np.process_notes
+    exit 1 unless np.publish_notes
     print "Finished successfully!\n" if $verbose
 end
 
